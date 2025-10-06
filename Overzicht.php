@@ -93,9 +93,12 @@ $result = $conn->query($sql);
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presentie Manager</title>
+    <title>Bekijk hier jouw overzicht</title>
+
+    <!-- CSS file -->
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 
     <style>
@@ -121,7 +124,6 @@ $result = $conn->query($sql);
                     <button type="submit">Toon</button>
                 </form>
 
-                <h1> Aanwezigheid </h1>
                 <?php if ($message): ?>
                     <p style="color: green;"><?= htmlspecialchars($message) ?></p>
                 <?php endif; ?>
@@ -129,6 +131,7 @@ $result = $conn->query($sql);
                 <!-- aanwezigheid table -->
                 <table>
                     <tr>
+                        <h3> Aanwezigheid: </h3>
                         <th>Naam</th>
                         <th>Aanwezig</th>
                         <th>Ziek</th>

@@ -31,9 +31,11 @@ $stmt->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Neem contact met ons op</title>
+
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 </head>
 <body>

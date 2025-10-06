@@ -15,9 +15,16 @@ include 'nav.php';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presentie Manager</title>
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Alles over het Museum Project</title>
+
+
+
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
     <!-- pagina word elke 2 seconden herladen voor testing -->
     <!-- <meta http-equiv="refresh" content="2">  auto-refresh every 2 seconds for dev -->
@@ -31,10 +38,10 @@ include 'nav.php';
         <!-- sticky navigatie buttons 
         <button id="sticky-button"><a href="#contact">Contact</a></button>
         <button id="sticky-button" style="margin-bottom: 40px;"><a href="#homepagina">Home</a></button> 
- 
+        -->
         <div class="container">
             <img src="img/logo1.png" alt="Museum project">
-        </div> -->
+        </div> 
     </section>
 </body>
 </html>

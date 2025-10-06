@@ -60,8 +60,11 @@ body {
   box-shadow: none;
   border-bottom: none;
   background: #dddddd;
-}
 
+}
+/* 
+
+*/
 /* Home pagina */
 .homepagina {
   width: 100%;
@@ -69,6 +72,11 @@ body {
   position: relative;
   padding: 0;
   display: flex;
+  justify-content: center;
+}
+
+.studenten {
+  margin: 50px;
   justify-content: center;
 }
 
@@ -112,7 +120,7 @@ body {
   align-items: center;
 }
 .contact form {
-  background-color: #e48212;
+  background-color: white;
   width: 400px;
   border: none;
   border-radius: 15px;
@@ -172,3 +180,4 @@ input[type="submit"]:hover {
 
   
 }
+

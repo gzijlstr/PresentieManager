@@ -48,11 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $stmt = $conn->prepare("INSERT INTO studenten (naam, groep_id) VALUES (?, ?)");
             $stmt->bind_param("si", $naam, $groep_id);
-
-            if ($stmt->execute()) {
-                $message = "Student toegevoegd";
+            if ($stmt->num_rows > 5) {
+                $message = "Je hebt al 5 leden";
             } else {
-                $message = $stmt->error;
+                $stmt->execute();
             }
         }
     }
@@ -110,27 +109,38 @@ if ($role === 'admin') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presentie Manager</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Presentie bewerken voor jouw groep</title>
+    <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
+
+    <style>
+        /* table styling voor de db data die is gefetched*/
+        table { border-collapse: collapse; width: 400px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        .homepagina .container { }
+    </style>
 </head>
 <body class="main-pagina">
     <!-- Home section-->
     <section id="homepagina" class="homepagina">
         <div class="container">
-            <h2>Mijn Groep</h2>
             <?php if ($message) echo "<p>$message</p>"; ?>
 
             <?php if ($groepenResult->num_rows > 0): ?>
-                <tr>
-                    <th>Groepnaam:</th>
-                </tr>
                 <?php while ($groep = $groepenResult->fetch_assoc()): ?>
-                    <h3><?= htmlspecialchars($groep['groepnaam']) ?></h3>
-                    <table>
+                    <table style="margin-bottom: 15px;">
                         <tr>
-                            <th>Studenten</th>
+                            <th>Groepnaam:</th>
+                            <th><p style=" font-weight: bolder; "><?= htmlspecialchars($groep['groepnaam']) ?></p></th>
+                        </tr>
+                    </table>
+                    <table style="margin-bottom: 50px;">
+                        <tr>
+                            <th>Studenten:</th>
                         </tr>
                         <?php
                         $groep_id = $groep['id'];
@@ -150,6 +160,7 @@ if ($role === 'admin') {
                     <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
                         <form action="Presentie.php" method="POST">
                             <input type="hidden" name="form_type" value="student">
+                            <h3>Student toevoegen</h3><br>
                             Naam student: <input type="text" name="naam" required>
                             <input type="submit" value="Toevoegen">
                         </form>

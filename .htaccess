@@ -1,0 +1,15 @@
+# Enable rewrite engine
+RewriteEngine On
+RewriteBase /PresentieManager/
+
+# Remove .php extension (so /main loads main.php)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^/]+)/?$ $1.php [L]
+
+# Optional: alias /hoofdpagina → main.php
+RewriteRule ^hoofdpagina/?$ main.php [L]
+
+# Optional: redirect .php requests to clean URL (SEO-friendly 301 redirect)
+RewriteCond %{THE_REQUEST} \s/+PresentieManager/([^.]+)\.php[?\s]
+RewriteRule ^ %1 [R=301,L]
