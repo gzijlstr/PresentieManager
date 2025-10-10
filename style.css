@@ -13,7 +13,7 @@ body {
 }
 
 #navmenu {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
@@ -92,7 +92,7 @@ body {
 
 body {
     font-family: Arial, sans-serif;
-    margin: 40px;
+
 }
 
 #header {
@@ -168,6 +168,18 @@ input[type="submit"] {
 }
 input[type="submit"]:hover {
     background: #45a049;
+}
+
+#footer {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  
+  font-family:"MS Sans Serif", Tahoma, sans-serif;
+  background-color: aliceblue;
 }
 
 @media (min-width: 992px) {

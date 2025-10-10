@@ -1,186 +1,163 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
-// checkt of de gebruiker is ingelogd, 
+echo "<pre>SESSION DEBUG:\n"; print_r($_SESSION); echo "</pre>";
 if (!isset($_SESSION['username'])) {
-    header("Location: loginpage.php"); 
+    header("Location: loginpage.php");
     exit();
 }
-?>
-<?php
-// database & navigatie bar 
-include 'db.php';
+
 include 'nav.php';
+include 'db.php';
 
-$message = '';
+// --- Debug POST ---
+echo "<pre style='background:#eee;padding:10px;border:1px solid #ccc;'>";
+echo "DEBUG POST:\n";
+print_r($_POST['studenten'] ?? 'No POST data yet.');
+echo "</pre>";
 
-// prepared statement voor het verkrijgen van de role van de gebruiker (username), bindt string aan user
+$message = "";
+
+// --- Get logged-in user info ---
 $stmt = $conn->prepare("SELECT id, role FROM users WHERE username = ?");
 $stmt->bind_param("s", $_SESSION['username']);
 $stmt->execute();
-
-
-// resultaat van de query, role en user_id worden gedefinieerd,
-// daarna wordt de statement gesloten
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $user_id = $user['id'];
 $role = $user['role'];
 $stmt->close();
 
+// --- Selected date ---
+$selected_date = $_GET['datum'] ?? date("Y-m-d");
 
-// Form en table *student/studenten*
-// Update de aanwezigheid table met de volgende value van de form:
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if ($_POST['form_type'] === "student") {
-        // Checkt of de variable geen NULL is en value TRUE of FALSE terug
-        $naam  = $_POST['naam'];
+// --- Handle POST: save/update all students ---
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studenten']) && is_array($_POST['studenten'])) {
 
-        // checkt de gebruiker (user_id) al een groep heeft
-        $stmt = $conn->prepare("SELECT id FROM groepen WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $groep = $result->fetch_assoc();
-        $stmt->close();
+    foreach ($_POST['studenten'] as $student_id => $data) {
+        $aanwezig = isset($data['aanwezig']) ? intval($data['aanwezig']) : 0;
+        $description = $data['description'] ?? '';
 
-        if ($groep) {
-            $groep_id = $groep['id'];
+        $sql = "INSERT INTO aanwezigheid (student_id, datum, aanwezig, description)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE aanwezig = VALUES(aanwezig), description = VALUES(description)";
 
-            $stmt = $conn->prepare("INSERT INTO studenten (naam, groep_id) VALUES (?, ?)");
-            $stmt->bind_param("si", $naam, $groep_id);
-            if ($stmt->num_rows > 5) {
-                $message = "Je hebt al 5 leden";
-            } else {
-                $stmt->execute();
-            }
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            $message .= "Fout bij student $student_id: " . $conn->error . "<br>";
+            continue;
         }
-    }
-    
-    // Form en table *groepen/groep*
-    if ($_POST['form_type'] === "groep") {
-        $groepnaam = $_POST['groepnaam'];
 
-        // query for obtaining the id of the current user
-        $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
-        $stmt->bind_param("s", $_SESSION['username']);
-        $stmt->execute();
+        // Debug each insert
+        echo "➡️ Inserting student $student_id | aanwezig=$aanwezig | date=$selected_date | desc='$description'<br>";
 
-        // getting the results
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $user_id = $user['id'];
-        $stmt->close();
-
-        // checkt of the gebruiker al een groep bezit
-        $stmt = $conn->prepare("SELECT id FROM groepen WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $stmt->store_result();
-
-        if ($stmt->num_rows > 0) {
-            echo "je hebt al een groep";
-        } else {
-
-            $stmt = $conn->prepare("INSERT INTO groepen (groepnaam, user_id) VALUES (?, ?)");
-            $stmt->bind_param("si", $groepnaam, $user_id);
-
-            // checkt of de statement is verstuurd. 
-            if ($stmt->execute()) {
-                echo "data is verwerkt";
-            } else {
-                echo "error: " . $stmt->error;
-            }
-        };
-
-        // statement is gesloten
+        $stmt->bind_param("isis", $student_id, $selected_date, $aanwezig, $description);
+        if (!$stmt->execute()) {
+            $message .= "Fout bij student $student_id: " . $stmt->error . "<br>";
+        }
         $stmt->close();
     }
+
+    if (!$message) $message = "✅ Aanwezigheid succesvol opgeslagen!";
 }
 
-// admin ziet alle groepen en scrum masters alleen de groepen die zijn aangemaakt met hen user_id
+// --- Fetch students for this user/group ---
 if ($role === 'admin') {
-    $groepenResult = $conn->query("SELECT id, groepnaam FROM groepen ORDER BY groepnaam ASC");
+    $sql = "SELECT s.id, s.naam, a.aanwezig, a.description
+            FROM studenten s
+            LEFT JOIN aanwezigheid a ON s.id = a.student_id AND a.datum = ?
+            ORDER BY s.naam ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $selected_date);
 } else {
-    $groepenResult = $conn->query("SELECT id, groepnaam FROM groepen WHERE user_id = $user_id");
+    $sql = "SELECT s.id, s.naam, a.aanwezig, a.description
+            FROM studenten s
+            JOIN groepen g ON s.groep_id = g.id
+            LEFT JOIN aanwezigheid a ON s.id = a.student_id AND a.datum = ?
+            WHERE g.user_id = ?
+            ORDER BY s.naam ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $selected_date, $user_id);
 }
 
+$stmt->execute();
+$result = $stmt->get_result();
+$students = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-    <!-- SEO Meta -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presentie bewerken voor jouw groep</title>
-    <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
-
-    <style>
-        /* table styling voor de db data die is gefetched*/
-        table { border-collapse: collapse; width: 400px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f0f0f0; }
-        tr:nth-child(even) { background-color: #fafafa; }
-        .homepagina .container { }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presentie bewerken</title>
+<link rel="stylesheet" href="style.css?v=<?php echo time();?>">
+<style>
+table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background-color: #f0f0f0; }
+tr:nth-child(even) { background-color: #fafafa; }
+form { margin-bottom: 15px; }
+button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px solid #999; cursor: pointer; }
+</style>
 </head>
-<body class="main-pagina">
-    <!-- Home section-->
-    <section id="homepagina" class="homepagina">
-        <div class="container">
-            <?php if ($message) echo "<p>$message</p>"; ?>
+<body>
 
-            <?php if ($groepenResult->num_rows > 0): ?>
-                <?php while ($groep = $groepenResult->fetch_assoc()): ?>
-                    <table style="margin-bottom: 15px;">
-                        <tr>
-                            <th>Groepnaam:</th>
-                            <th><p style=" font-weight: bolder; "><?= htmlspecialchars($groep['groepnaam']) ?></p></th>
-                        </tr>
-                    </table>
-                    <table style="margin-bottom: 50px;">
-                        <tr>
-                            <th>Studenten:</th>
-                        </tr>
-                        <?php
-                        $groep_id = $groep['id'];
-                        $studenten = $conn->query("SELECT naam FROM studenten WHERE groep_id = $groep_id");
-                        if ($studenten->num_rows > 0): 
-                            while ($student = $studenten->fetch_assoc()): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($student['naam']) ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr><td><em>Geen studenten toegevoegd</em></td></tr>
-                        <?php endif; ?> <!-- ✅ closes if($studenten->num_rows > 0) -->
-                    </table>
+<h2>Presentie bewerken</h2>
 
-                    <!-- only allow adding students to your own group -->
-                    <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
-                        <form action="Presentie.php" method="POST">
-                            <input type="hidden" name="form_type" value="student">
-                            <h3>Student toevoegen</h3><br>
-                            Naam student: <input type="text" name="naam" required>
-                            <input type="submit" value="Toevoegen">
-                        </form>
-                    <?php endif; ?>
+<!-- Display message -->
+<?php if ($message): ?>
+<div style="background: #cfc; padding:10px; margin-bottom:10px;">
+    <?= $message ?>
+</div>
+<?php endif; ?>
 
-                <?php endwhile; ?>
-            <?php else: ?>
-                <!-- only show if user has no group -->
-                <h3>Maak een groep</h3>
-                <form action="Presentie.php" method="POST">
-                    <input type="hidden" name="form_type" value="groep">
-                    Naam van de groep: <input type="text" name="groepnaam" required><br>
-                    <input type="submit" value="Groep toevoegen">
-                </form>
-            <?php endif; ?>
-        </div>
-    </section>
-    <!--script JS--> 
-    <script>
-        
-    </script>
+<!-- Show current request type -->
+<p><strong>DEBUG:</strong> Current method: <?= htmlspecialchars($_SERVER['REQUEST_METHOD']) ?></p>
+
+<!-- ✅ Calendar / Date selector -->
+<form id="dateForm" method="GET" action="">
+    <label>Datum:
+        <input type="date" name="datum" value="<?= htmlspecialchars($selected_date) ?>">
+    </label>
+    <button type="submit">Toon</button>
+</form>
+
+
+<!-- ✅ Students POST form -->
+<form id="saveForm" method="POST" action="?datum=<?= htmlspecialchars($selected_date) ?>">
+
+    <table>
+        <tr>
+            <th>Naam</th>
+            <th>Aanwezig</th>
+            <th>Opmerking</th>
+        </tr>
+        <?php foreach($students as $s): ?>
+        <tr>
+            <td><?= htmlspecialchars($s['naam']) ?></td>
+            <td>
+                <label>
+                    <input type="radio" name="studenten[<?= $s['id'] ?>][aanwezig]" value="1" <?= $s['aanwezig'] ? 'checked' : '' ?>> Ja
+                </label>
+                <label>
+                    <input type="radio" name="studenten[<?= $s['id'] ?>][aanwezig]" value="0" <?= !$s['aanwezig'] ? 'checked' : '' ?>> Nee
+                </label>
+            </td>
+            <td>
+                <input type="text" name="studenten[<?= $s['id'] ?>][description]" 
+                       value="<?= htmlspecialchars($s['description'] ?? '') ?>" 
+                       placeholder="Optioneel" style="width:95%;">
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+    <br>
+    <button type="submit" form="saveForm">Opslaan</button>
+</form>
+
 </body>
 </html>

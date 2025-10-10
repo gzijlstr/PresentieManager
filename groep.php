@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 // checkt of de gebruiker is ingelogd, 
 if (!isset($_SESSION['username'])) {
@@ -158,7 +161,7 @@ if ($role === 'admin') {
 
                     <!-- only allow adding students to your own group -->
                     <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
-                        <form action="Presentie.php" method="POST">
+                        <form action="groep.php" method="POST">
                             <input type="hidden" name="form_type" value="student">
                             <h3>Student toevoegen</h3><br>
                             Naam student: <input type="text" name="naam" required>
@@ -170,7 +173,7 @@ if ($role === 'admin') {
             <?php else: ?>
                 <!-- only show if user has no group -->
                 <h3>Maak een groep</h3>
-                <form action="Presentie.php" method="POST">
+                <form action="groep.php" method="POST">
                     <input type="hidden" name="form_type" value="groep">
                     Naam van de groep: <input type="text" name="groepnaam" required><br>
                     <input type="submit" value="Groep toevoegen">

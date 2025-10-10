@@ -40,8 +40,12 @@ include 'nav.php';
         <button id="sticky-button" style="margin-bottom: 40px;"><a href="#homepagina">Home</a></button> 
         -->
         <div class="container">
+            <h1>Presentie Manager voor het Museum project</h1>
             <img src="img/logo1.png" alt="Museum project">
         </div> 
+    </section>
+    <section id="footer">
+        <p>© 2025 Gerben Zijlstra.</p>
     </section>
 </body>
 </html>

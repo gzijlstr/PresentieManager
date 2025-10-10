@@ -41,12 +41,12 @@ $stmt->close();
 <body>
     <!-- Contact  -->
     <section id="contact" class="contact">
-            <form action="" id="" method="">  
+            <form action="mailto:marco.hoekstra@firda.nl" method="post" enctype="text/plain">  
                 <h2>Contact formulier</h2>
-                Voor- en achternaam: <input type="text" name=""><br>
-                Telefoonnummer: <input type="text" name=""><br>
-                E-mail address: <input type="text" name=""><br>
-                Uw bericht: <input type="text" style="height: 100px;" name="">
+                Voor- en achternaam: <input type="text" name="" required><br>
+                Studentnummer: <input type="text" name="" required><br>
+                E-mail address (optioneel): <input type="text" name=""><br>
+                Opmerking: <input type="text" style="height: 100px;" name="" required>
                 <input type="submit" value="Versturen">
             </form>
     </section>

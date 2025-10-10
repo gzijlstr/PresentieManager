@@ -1,38 +1,29 @@
-
 <?php
-session_start(); // start session to store login state
+session_start();
 include 'db.php';
 include 'nav.php';
-$message = ""; // incase there is an error
+$message = "";
 
 // only runs when the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
 
-    // reads the form inputs
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    // prepared statements against sql injections,
-    // binds the value "string" to the username
     $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
-    // executes query and retrieves result
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // runs, if there is atleast one existing user, and fetches an array
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
-        // if the password and user match with one of the database, the login is succesfull
-        if (password_verify($password, $user['password'])) {
-            // for this Session, the username gets stored
 
-            // login successful
+        if (password_verify($password, $user['password'])) {
+            // ✅ store session data correctly
             $_SESSION['username'] = $user['username'];
-            $_SESSION['password'] = $pass['password'];
-            $_SESSION['role'] = $role['role'];
-            header("Location: main.php"); // redirect to main app
+            $_SESSION['role'] = $user['role']; // from DB
+            $_SESSION['user_id'] = $user['id']; // optional, often useful
+
+            header("Location: main.php");
             exit();
         } else {
             $message = "❌ Ongeldige gebruikersnaam of wachtwoord.";
@@ -45,47 +36,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-    <!-- SEO Meta -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log gemakkelijk in met jouw informatie</title>
-
-    <!-- CSS file -->
-    <link rel="stylesheet" href="style.css">
-    <!-- pagina word elke 2 seconden herladen voor testing -->
-   <!-- <meta http-equiv="refresh" content="2"> <!-- auto-refresh every 2 seconds for dev -->
-    <style>
-        .error {
-            color: red;
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+<style>.error{color:red;display:none;}</style>
 </head>
 <body class="main-pagina">
-    <!-- Home section-->
-    <section id="homepagina">
-        <h1>Login</h1><br><br>
-        <?php if ($message) echo "<p>$message</p>"; ?>
-        <form id="loginform" method="POST" onsubmit="return validateForm()">
-            Gebruikersnaam: <input id="usernamelog" type="text" name="username" required><br>
-            Wachtwoord: <input id="passwordlog" type="password" name="password" required><br>
-            <input type="submit" value="Login">    
-        </form>
-    </section>
-    <!--script JS-->
-    <script>
-        // function ValidateForm() {
-        //     let x = document.Forms["loginform"]["username"].value;
-        //     if (x == '') {
-        //         alert("form must be filled out")
-        //         return false;
-        //     }
-        // }
-    </script>
+<section id="homepagina">
+    <h1>Login</h1><br><br>
+    <?php if ($message) echo "<p>$message</p>"; ?>
+    <form id="loginform" method="POST">
+        Gebruikersnaam: <input id="usernamelog" type="text" name="username" required><br>
+        Wachtwoord: <input id="passwordlog" type="password" name="password" required><br>
+        <input type="submit" value="Login">    
+    </form>
+</section>
 </body>
 </html>
