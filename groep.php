@@ -115,7 +115,11 @@ if ($role === 'admin') {
     <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presentie bewerken voor jouw groep</title>
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Beheer je groep als scrum master.</title>
+
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 
     <style>

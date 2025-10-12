@@ -39,9 +39,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+<!-- SEO Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Login pagina voor het Museum project</title>
+
 <link rel="stylesheet" href="style.css">
 <style>.error{color:red;display:none;}</style>
 </head>

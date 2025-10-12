@@ -34,7 +34,12 @@ $stmt->close();
     <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neem contact met ons op</title>
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Neem contact met ons op.</title>
+
+    <!-- Style css -->
 
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 </head>

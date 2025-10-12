@@ -55,10 +55,16 @@ $stmt->close();
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Overzicht aanwezigheid</title>
-<link rel="stylesheet" href="style.css?v=<?php echo time();?>">
+    <!-- SEO Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Overzicht data van studenten en groepen.</title>
+
+    <!-- Style css -->
+    <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 <style>
 table { border-collapse: collapse; width: 100%; }
 th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }

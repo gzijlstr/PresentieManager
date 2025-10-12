@@ -1,9 +1,9 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
 
 session_start();
-echo "<pre>SESSION DEBUG:\n"; print_r($_SESSION); echo "</pre>";
+// echo "<pre>SESSION DEBUG:\n"; print_r($_SESSION); echo "</pre>";
 if (!isset($_SESSION['username'])) {
     header("Location: loginpage.php");
     exit();
@@ -13,10 +13,10 @@ include 'nav.php';
 include 'db.php';
 
 // --- Debug POST ---
-echo "<pre style='background:#eee;padding:10px;border:1px solid #ccc;'>";
-echo "DEBUG POST:\n";
-print_r($_POST['studenten'] ?? 'No POST data yet.');
-echo "</pre>";
+// echo "<pre style='background:#eee;padding:10px;border:1px solid #ccc;'>";
+// echo "DEBUG POST:\n";
+// print_r($_POST['studenten'] ?? 'No POST data yet.');
+// echo "</pre>";
 
 $message = "";
 
@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studenten']) && is_ar
         }
 
         // Debug each insert
-        echo "➡️ Inserting student $student_id | aanwezig=$aanwezig | date=$selected_date | desc='$description'<br>";
+        // echo "➡️ Inserting student $student_id | aanwezig=$aanwezig | date=$selected_date | desc='$description'<br>";
 
         $stmt->bind_param("isis", $student_id, $selected_date, $aanwezig, $description);
         if (!$stmt->execute()) {
@@ -91,8 +91,14 @@ $stmt->close();
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- SEO Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Registreer of bewerk hier de presentie</title>
+
 <title>Presentie bewerken</title>
 <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 <style>
@@ -116,7 +122,7 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
 <?php endif; ?>
 
 <!-- Show current request type -->
-<p><strong>DEBUG:</strong> Current method: <?= htmlspecialchars($_SERVER['REQUEST_METHOD']) ?></p>
+<!-- <p><strong>DEBUG:</strong> Current method: // <?= htmlspecialchars($_SERVER['REQUEST_METHOD']) ?></p> -->
 
 <!-- ✅ Calendar / Date selector -->
 <form id="dateForm" method="GET" action="">
