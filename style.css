@@ -20,9 +20,14 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   margin: 0;
+  text-decoration: none;
+}
+
+a {
+  text-decoration: none;
 }
 
 /* Navigation Bar */
@@ -68,8 +73,9 @@ body {
 
 /* Home Page */
 .homepagina {
-  min-height: 100vh;
-  display: flex;
+  scroll-behavior: smooth;
+  min-height: 72vh;
+  /* display: flex; */
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -81,12 +87,29 @@ body {
   color: var(--color-greenblue);
 }
 
+.homepagina .container h1 {
+  font-size: 3rem;
+  color: var(--color-greenblue);
+  text-align: center;
+  margin: 0 auto 1rem auto;
+  max-width: 90%;
+}
+
+/* Maak de h1 kleiner op mobiele apparaten */
+@media (max-width: 600px) {
+  .homepagina .container h1 {
+    font-size: 1.8rem;
+    padding: 0 1rem;
+  }
+}
+
+
 /* Contact Form */
 .contact {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 90vh;
+  min-height: 50vh;
 }
 
 .contact form {
@@ -107,6 +130,7 @@ form {
 
 input[type="text"],
 input[type="email"],
+input[type="password"],
 textarea {
   width: 100%;
   padding: 10px;
@@ -175,13 +199,207 @@ button:hover,
 
 /* Footer */
 #footer {
+  position: static; /* of gewoon weglaten */
   background-color: var(--color-greenblue);
   color: var(--color-white);
   text-align: center;
   padding: 1rem 0;
   font-size: 14px;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+  min-height: 50px;
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* --------------------------------------------
+   Responsive navigation (hamburger menu)
+---------------------------------------------*/
+#menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+/* Zorg dat nav de volledige breedte gebruikt */
+.nav-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+}
+/* Groep.php */
+.groep-container {
+  column-count: 2;
+  width: 100%;
+  height: 95vh;
+  justify-content: space-evenly;
+  display: flex;
+}
+
+.groep-container form {
+  width: 400px;
+}
+
+.delete-btn {
+    background-color: crimson;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 3px 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.delete-btn:hover {
+    background-color: darkorange;
+}
+
+/* login.php */
+.login-veld {
+  margin: auto;
+}
+
+#loginform {
+  width: 400px;
+  margin: 50px
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  #navmenu {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem 1rem;
+  }
+
+  .groep-container {
+    width: 50px;
+    height: 95vh;
+    flex-direction: column;
+  }
+
+  .groep-container form {
+    width: 350px;
+  }
+
+  /* nav */
+
+  .nav-container {
+    display: block;
+
+  }
+  .homepagina .container .intro {
+    justify-content: center;
+    display: grid;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .login-veld {
+    width: 100%;
+  }
+
+  #loginform {
+    width: 300px;
+  }
+
+  #menu-toggle {
+    display: block;
+  }
+
+  #navmenu ul {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 0.5rem;
+    background: var(--color-greenblue);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  #navmenu ul.show {
+    display: flex;
+  }
+
+  #navmenu a {
+    display: block;
+    /* width: 100%; */
+    text-align: center;
+    padding: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  #navmenu a:hover {
+    background: var(--color-dark-orange);
+  }
+}
+
+/* --------------------------------------------
+   Home Page Responsive Image + Heading
+---------------------------------------------*/
+.homepagina .container {
+  max-width: 100%;
+  width: 100%;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+.homepagina .container h1 {
+  font-size: 3rem;
+  color: var(--color-greenblue);
+  text-align: center;
+  margin: 0 auto 1rem auto;
+  max-width: 90%;
+  word-wrap: break-word;
+}
+
+.homepagina .container img {
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.homepagina .container .intro {
+  column-count: 2;
+  justify-content: center;
+    align-items: center;
+
+}
+
+.homepagina .container .intro .intro-text {
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 55px;
+  text-align: center;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .homepagina .container h1 {
+    font-size: 1.8rem;
+    padding: 0 1rem;
+  }
+
+  .homepagina .container img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* --------------------------------------------
+   Footer blijft statisch
+---------------------------------------------*/
+#footer {
+  position: static;
+  background-color: var(--color-greenblue);
+  color: var(--color-white);
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 14px;
+  border-bottom: 7px solid var(--color-greenblue);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }

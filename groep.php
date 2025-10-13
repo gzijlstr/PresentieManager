@@ -32,12 +32,13 @@ $stmt->close();
 
 
 // Form en table *student/studenten*
-// Update de aanwezigheid table met de volgende value van de form:
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if ($_POST['form_type'] === "student") {
-        // Checkt of de variable geen NULL is en value TRUE of FALSE terug
-        $naam  = $_POST['naam'];
+// Update de studenten met de volgende value van de form:
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['form_type'])) {  
 
+    // 🎯 STUDENT TOEVOEGEN
+    if ($_POST['form_type'] === "student") {
+        $naam = trim($_POST['naam'] ?? '');
+        // Checkt of de variable geen NULL is en value TRUE of FALSE terug
         // checkt de gebruiker (user_id) al een groep heeft
         $stmt = $conn->prepare("SELECT id FROM groepen WHERE user_id = ?");
         $stmt->bind_param("i", $user_id);
@@ -49,14 +50,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($groep) {
             $groep_id = $groep['id'];
 
-            $stmt = $conn->prepare("INSERT INTO studenten (naam, groep_id) VALUES (?, ?)");
-            $stmt->bind_param("si", $naam, $groep_id);
-            if ($stmt->num_rows > 5) {
-                $message = "Je hebt al 5 leden";
+            // ✅ Tel aantal studenten
+            $countQuery = $conn->prepare("SELECT COUNT(*) AS count FROM studenten WHERE groep_id = ?");
+            $countQuery->bind_param("i", $groep_id);
+            $countQuery->execute();
+            $countResult = $countQuery->get_result();
+            $count = $countResult->fetch_assoc()['count'];
+            $countQuery->close();
+
+            if ($count >= 10) {
+                $message = "⚠️ Je hebt al het maximum van 10 studenten in deze groep.";
             } else {
-                $stmt->execute();
+                $stmt = $conn->prepare("INSERT INTO studenten (naam, groep_id) VALUES (?, ?)");
+                $stmt->bind_param("si", $naam, $groep_id);
+                if ($stmt->execute()) {
+                    $message = "✅ Student '$naam' toegevoegd aan je groep.";
+                } else {
+                    $message = "❌ Fout bij toevoegen student: " . $stmt->error;
+                }
+                $stmt->close();
             }
+        } else {
+            $message = "❌ Je hebt nog geen groep aangemaakt.";
         }
+    }
+
+    // 🗑️ STUDENT VERWIJDEREN
+    if ($_POST['form_type'] === "delete_student") {
+        $student_id = intval($_POST['student_id'] ?? 0);
+
+        // Controleer of de student echt bij de gebruiker hoort (veiligheid!)
+        $stmt = $conn->prepare("SELECT s.id 
+            FROM studenten s 
+            JOIN groepen g ON s.groep_id = g.id 
+            WHERE s.id = ? AND g.user_id = ?");
+        $stmt->bind_param("ii", $student_id, $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0 || $role === 'admin') {
+            $delete = $conn->prepare("DELETE FROM studenten WHERE id = ?");
+            $delete->bind_param("i", $student_id);
+            if ($delete->execute()) {
+                $message = "🗑️ Student succesvol verwijderd.";
+            } else {
+                $message = "❌ Fout bij verwijderen student: " . $delete->error;
+            }
+            $delete->close();
+        } else {
+            $message = "🚫 Je mag deze student niet verwijderen.";
+        }
+        $stmt->close();
     }
     
     // Form en table *groepen/groep*
@@ -124,60 +168,83 @@ if ($role === 'admin') {
 
     <style>
         /* table styling voor de db data die is gefetched*/
-        table { border-collapse: collapse; width: 400px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f0f0f0; }
+        table { border-collapse: collapse; width: 390px; border-radius: 20px;}
+        th, td { border: 1px dotted #b7b7b7ff; border-radius: 5px; padding: 8px; text-align: left; }
+        th { background-color: #f0f0f0; border-radius: 5px;}
         tr:nth-child(even) { background-color: #fafafa; }
         .homepagina .container { }
+        .delete-form-button {
+            padding: 0  ;
+            color: var(--color-orange);
+
+        }
     </style>
 </head>
 <body class="main-pagina">
+    <!-- Display message -->
+    <?php if ($message): ?>
+    <div style="background: #cfc; padding:10px; margin-bottom:10px;">
+        <?= $message ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Home section-->
     <section id="homepagina" class="homepagina">
-        <div class="container">
-            <?php if ($message) echo "<p>$message</p>"; ?>
-
+        <div class="groep-container">
             <?php if ($groepenResult->num_rows > 0): ?>
                 <?php while ($groep = $groepenResult->fetch_assoc()): ?>
-                    <table style="margin-bottom: 15px;">
+                    <div class="box1">
+                        <table style="margin-bottom: 15px;">
                         <tr>
-                            <th>Groepnaam:</th>
+                            <th>Groep naam:</th>
                             <th><p style=" font-weight: bolder; "><?= htmlspecialchars($groep['groepnaam']) ?></p></th>
                         </tr>
-                    </table>
-                    <table style="margin-bottom: 50px;">
-                        <tr>
-                            <th>Studenten:</th>
-                        </tr>
-                        <?php
-                        $groep_id = $groep['id'];
-                        $studenten = $conn->query("SELECT naam FROM studenten WHERE groep_id = $groep_id");
-                        if ($studenten->num_rows > 0): 
-                            while ($student = $studenten->fetch_assoc()): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($student['naam']) ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr><td><em>Geen studenten toegevoegd</em></td></tr>
-                        <?php endif; ?> <!-- ✅ closes if($studenten->num_rows > 0) -->
-                    </table>
+                        </table>
+                        <table style="margin-bottom: 50px;">
+                            <tr>
+                                <th>Studenten:</th>
+                                <th>Actie</th>
+                            </tr>
+                            <?php
+                            $groep_id = $groep['id'];
+                            $studenten = $conn->query("SELECT id, naam FROM studenten WHERE groep_id = $groep_id");
+                            if ($studenten->num_rows > 0): 
+                                while ($student = $studenten->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($student['naam']) ?></td>
+                                        <td>
+                                        <!-- Delete button -->
+                                        <form method="POST" action="" class="delete-form-button" style="display:inline;">
+                                            <input type="hidden" name="form_type" value="delete_student">
+                                            <input type="hidden" name="student_id" value="<?= $student['id'] ?>">
+                                            <button type="submit" class="delete-btn" onclick="return confirm('Weet je zeker dat je deze student wilt verwijderen?')">Verwijderen</button>
+                                        </form>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr><td><em>Geen studenten toegevoegd</em></td></tr>
+                            <?php endif; ?> <!-- closes if($studenten->num_rows > 0) -->
+                        </table>
+                    </div>
+                    <div class="box2">
+                            <!-- only allow adding students to your own group -->
+                        <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
+                                <form method="POST" action="?groep_id=...">
 
-                    <!-- only allow adding students to your own group -->
-                    <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
-                        <form action="groep.php" method="POST">
-                            <input type="hidden" name="form_type" value="student">
-                            <h3>Student toevoegen</h3><br>
-                            Naam student: <input type="text" name="naam" required>
-                            <input type="submit" value="Toevoegen">
-                        </form>
-                    <?php endif; ?>
+                                    <input type="hidden" name="form_type" value="student">
+                                    <h3>Student toevoegen</h3><br>
+                                    Naam student: <input type="text" name="naam" required>
+                                    <input type="submit" value="Toevoegen">
+                                </form>
+                        <?php endif; ?>
+                    </div>
 
                 <?php endwhile; ?>
             <?php else: ?>
                 <!-- only show if user has no group -->
                 <h3>Maak een groep</h3>
-                <form action="groep.php" method="POST">
+                <form method="POST" action="?groep_id=...">
                     <input type="hidden" name="form_type" value="groep">
                     Naam van de groep: <input type="text" name="groepnaam" required><br>
                     <input type="submit" value="Groep toevoegen">

@@ -73,9 +73,9 @@ tr:nth-child(even) { background-color: #fafafa; }
 </style>
 </head>
 <body>
-<h2>Overzicht aanwezigheid voor <?= htmlspecialchars($selected_date) ?></h2>
-
+<br>
 <form method="GET" action="overzicht.php">
+    <h2>Overzicht aanwezigheid voor <?= htmlspecialchars($selected_date) ?></h2>
     <label>Datum: <input type="date" name="datum" value="<?= htmlspecialchars($selected_date) ?>"></label>
     <button type="submit">Toon</button>
 </form>

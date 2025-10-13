@@ -40,8 +40,23 @@ include 'nav.php';
         <button id="sticky-button" style="margin-bottom: 40px;"><a href="#homepagina">Home</a></button> 
         -->
         <div class="container">
-            <h1>Presentie Manager voor het Museum project</h1>
-            <img src="img/logo1.png" alt="Museum project">
+            <div class="intro">
+                <img src="img/logo1.png" alt="Museum project">
+                <div class="intro-text">
+                    <h1>Presentie Manager</h1>
+                    <p>
+                    Presentie Manager is een webapplicatie waarmee scrum masters en docenten <br> 
+                    aanwezigheidsgegevens van studenten kunnen beheren. <br>
+                    De tool biedt overzicht, efficiëntie en gebruiksgemak bij het bijhouden van presentie.
+                    </p>
+                </div>
+                <br>
+                <br>
+                <div class="intro-text" style="height: 70px;">
+                    <p>Merk je een bug of iets dat niet helemaal werkt zoals het hoort?
+                        Laat het ons weten via het  <a href="contact.php">contactformulier</a>!</p>
+                </div>
+            </div>
         </div> 
     </section>
     <section id="footer">

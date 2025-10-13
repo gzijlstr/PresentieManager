@@ -46,7 +46,7 @@ $stmt->close();
 <body>
     <!-- Contact  -->
     <section id="contact" class="contact">
-            <form action="mailto:marco.hoekstra@firda.nl" method="post" enctype="text/plain">  
+            <form action="mailto:marco.hoekstra@firda.nl" method="post" enctype="text/plain" style="margin-top: 50px;">   
                 <h2>Contact formulier</h2>
                 Voor- en achternaam: <input type="text" name="" required><br>
                 Studentnummer: <input type="text" name="" required><br>

@@ -1,8 +1,10 @@
+
 <?php
 session_start();
 include 'db.php';
 include 'nav.php';
 $message = "";
+
 
 // only runs when the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -36,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -51,14 +54,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <style>.error{color:red;display:none;}</style>
 </head>
 <body class="main-pagina">
-<section id="homepagina">
-    <h1>Login</h1><br><br>
-    <?php if ($message) echo "<p>$message</p>"; ?>
-    <form id="loginform" method="POST">
-        Gebruikersnaam: <input id="usernamelog" type="text" name="username" required><br>
-        Wachtwoord: <input id="passwordlog" type="password" name="password" required><br>
-        <input type="submit" value="Login">    
-    </form>
+<!-- Display message -->
+    <?php if ($message): ?>
+    <div style="background: #cfc; padding:10px; margin-bottom:10px;">
+        <?= $message ?>
+    </div>
+    <?php endif; ?>
+<section id="homepagina" style="display: flex;">
+    <br><br>
+    <div class="login-veld">
+        <form id="loginform" method="POST">
+            <h2>Login</h2>
+            Gebruikersnaam: <input id="usernamelog" type="text" name="username" required><br>
+            Wachtwoord: <input id="passwordlog" type="password" name="password" required><br>
+            <br>
+            <input type="submit" value="Login">    
+        </form>
+    </div>
 </section>
 </body>
 </html>

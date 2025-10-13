@@ -99,7 +99,6 @@ $stmt->close();
     <meta name="description" content="Applicatie voor het regelen van groepspresentie">
     <title>Registreer of bewerk hier de presentie</title>
 
-<title>Presentie bewerken</title>
 <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 <style>
 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
@@ -112,7 +111,6 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
 </head>
 <body>
 
-<h2>Presentie bewerken</h2>
 
 <!-- Display message -->
 <?php if ($message): ?>
@@ -125,7 +123,9 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
 <!-- <p><strong>DEBUG:</strong> Current method: // <?= htmlspecialchars($_SERVER['REQUEST_METHOD']) ?></p> -->
 
 <!-- ✅ Calendar / Date selector -->
+ <br>
 <form id="dateForm" method="GET" action="">
+    <h2>Presentie bewerken</h2>
     <label>Datum:
         <input type="date" name="datum" value="<?= htmlspecialchars($selected_date) ?>">
     </label>
@@ -135,7 +135,6 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
 
 <!-- ✅ Students POST form -->
 <form id="saveForm" method="POST" action="?datum=<?= htmlspecialchars($selected_date) ?>">
-
     <table>
         <tr>
             <th>Naam</th>
