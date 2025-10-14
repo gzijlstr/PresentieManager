@@ -11,6 +11,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
       <li><a href="overzicht.php" class="<?= $current_page == 'overzicht.php' ? 'active' : '' ?>">Overzicht</a></li>
       <li><a href="contact.php" class="<?= $current_page == 'contact.php' ? 'active' : '' ?>">Contact</a></li>
 
+
+      <?php if (isset($_SESSION['username']) && $_SESSION['username'] === 'teacher1'): ?>
+      <a href="scrum_registratie.php">Beheer gebruikers</a>
+      <?php endif; ?>
+
+
       <?php if (isset($_SESSION['username'])): ?>
         <li><a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['username']); ?>)</a></li>
       <?php endif; ?>
