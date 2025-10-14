@@ -3,7 +3,14 @@
 session_start();
 include 'db.php';
 include 'nav.php';
+
 $message = "";
+
+// ✅ Toon logout message indien aanwezig
+if (isset($_SESSION['logout_message'])) {
+    $message = $_SESSION['logout_message'];
+    unset($_SESSION['logout_message']); // verwijder na tonen
+}
 
 
 // only runs when the form is submitted
@@ -60,6 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?= $message ?>
     </div>
     <?php endif; ?>
+    
 <section id="homepagina" style="display: flex;">
     <br><br>
     <div class="login-veld">
