@@ -15,10 +15,9 @@ if (!isset($_SESSION['username'])) {
 include 'nav.php';
 include 'db.php';
 
-// standaard bericht voor debugging of gebruiker informatie
 $message = "";
 
-// bindt de gegevens van de gebruiker aan de gebruiker, prepared statement 
+// gebruiker informatie behalen met een prepared query
 $stmt = $conn->prepare("SELECT id, role FROM users WHERE username = ?");
 $stmt->bind_param("s", $_SESSION['username']);
 $stmt->execute();
@@ -28,19 +27,19 @@ $user_id = $user['id'];
 $role = $user['role'];
 $stmt->close();
 
-// verkrijgt geselecteerde datum
+// geselecteerde datum 
 $selected_date = $_GET['datum'] ?? date("Y-m-d");
 
-// verkrijgt verschillende groepen voor admin view
+// filteren van groepen voor de docent/admin account
 $selected_group = $_GET['groep'] ?? "";
 
-// Admin/docent view
+// docent/admin view 
 if ($role === 'admin') {
 
-    // alle groepen ophalen met query in volgorde 
+    // alle groepen behalen in volgorde
     $groepen = $conn->query("SELECT id, groepnaam FROM groepen ORDER BY groepnaam ASC");
 
-    // query voor het filteren van de groepen, met alle informatie van de studenten
+    // query voor de benodigde informatie over de geselecteerde groep
     $sql = "SELECT s.id, s.naam, g.id AS groep_id, g.groepnaam, a.aanwezig, a.description
             FROM studenten s
             LEFT JOIN groepen g ON s.groep_id = g.id
@@ -51,37 +50,38 @@ if ($role === 'admin') {
         $sql .= " WHERE g.id = ?";
     }
 
+    // groep met studenten namen
     $sql .= " ORDER BY g.groepnaam, s.naam ASC";
 
-    // prepared statement voor het ophalen van de datum met de geselecteerde groep
     $stmt = $conn->prepare($sql);
+
     if ($selected_group) {
         $stmt->bind_param("si", $selected_date, $selected_group);
     } else {
         $stmt->bind_param("s", $selected_date);
     }
+
     $stmt->execute();
     $result = $stmt->get_result();
     $students = $result->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
-    // studenten worden in haar groep gesorteerd
+    // studenten groeperen
     $grouped_students = [];
     foreach ($students as $s) {
         $grouped_students[$s['groepnaam']][] = $s;
     }
 }
 
-// Scrum master view
+// scrum master view
 else {
-    // functie voor het verkrijgen van de gebruiker's groep
+    // gebruiker's groep behalen met debug
     $stmt = $conn->prepare("SELECT id, groepnaam FROM groepen WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $groep_result = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    // als groep daadwerkelijk correct bestaat word alle informatie behaald met een prepared statement, anders: Error
     if ($groep_result) {
         $groep_id = $groep_result['id'];
         $groepnaam = $groep_result['groepnaam'];
@@ -113,13 +113,12 @@ else {
     <meta name="description" content="Applicatie voor het regelen van groepspresentie">
     <title>Overzicht</title>
 
-    <!-- boostrap gebruik voor HTML -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Style CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
     <style>
-        table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+        .box1 { display: flex; justify-content: center; flex-direction: column; align-items: center;}
+        table { border-collapse: collapse; width: 80%; margin-bottom: 30px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
         th { background-color: #f0f0f0; }
         tr:nth-child(even) { background-color: #fafafa; }
@@ -131,12 +130,12 @@ else {
 </head>
 <body>
 
+<!-- Datum form -->
 <form method="GET" action="overzicht.php">
-    <!-- Selected datum functie -->
     <h2>Overzicht aanwezigheid voor <?= htmlspecialchars($selected_date) ?></h2>
     <label>Datum: <input type="date" name="datum" value="<?= htmlspecialchars($selected_date) ?>"></label>
 
-    <!-- Admin view voor alle groepen en studenten in categorieen -->
+    <!-- Docent groepen sorteerder -->
     <?php if ($role === 'admin'): ?>
         <label style="margin-left:20px;">Groep:
             <select name="groep" onchange="this.form.submit()">
@@ -152,13 +151,15 @@ else {
     <button type="submit">Toon</button>
 </form>
 
-
-<?php if ($role === 'admin'): ?>
+<class class="box1">
+     <?php if ($role === 'admin'): ?>
 
     <?php if ($selected_group): ?>
+        <!-- als geselecteerde groep bestaat dan "groepnaam" anders "onbekend" -->
         <h3>Groep: <?= htmlspecialchars(array_values($grouped_students)[0][0]['groepnaam'] ?? 'Onbekend') ?></h3>
     <?php endif; ?>
 
+    <!-- stundenten gesorteerd in hen eigen groep -->
     <?php if ($grouped_students): ?>
         <?php foreach ($grouped_students as $groepnaam => $leden): ?>
             <?php if (!$selected_group): ?>
@@ -174,7 +175,7 @@ else {
                 <?php foreach ($leden as $s): ?>
                     <tr>
                         <td><?= htmlspecialchars($s['naam']) ?></td>
-                        <td><?= $s['aanwezig'] === null ? '-' : ($s['aanwezig'] ? 'Ja' : 'Nee') ?></td>
+                        <td><?= $s['aanwezig'] === null ? '-' : ($s['aanwezig'] ? '✅ Ja' : '❌ Nee') ?></td>
                         <td><?= htmlspecialchars($s['description'] ?? '-') ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -183,12 +184,14 @@ else {
     <?php else: ?>
         <p>Geen gegevens gevonden.</p>
     <?php endif; ?>
+</class>
 
+<!-- Scrum master view voor zijn groep met informatie over elke student van de geselecteerde datum  -->
 <?php else: ?>
 
     <h3>Groep: <?= htmlspecialchars($groepnaam) ?></h3>
 
-    <div class="card mb-4 shadow-sm border-0 overzicht-card">
+    <div class="card mb-4 shadow-sm border-0 overzicht-card w-75">
   <div class="card-header text-white" style="background-color: var(--color-greenblue);">
       <h5 class="mb-0"><?= htmlspecialchars($groepnaam ?: 'Geen groep') ?></h5>
   </div>
@@ -202,7 +205,7 @@ else {
               </tr>
           </thead>
           <tbody>
-              <?php foreach ($leden as $s): ?>
+              <?php foreach ($students as $s): ?>
               <tr>
                   <td><?= htmlspecialchars($s['naam']) ?></td>
                   <td><?= $s['aanwezig'] === null ? '-' : ($s['aanwezig'] ? '✅ Ja' : '❌ Nee') ?></td>

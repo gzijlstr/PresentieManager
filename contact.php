@@ -44,6 +44,17 @@ $stmt->close();
 
     <!-- Style css -->
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
+    <style>
+        input[type="text"], input[type="email"], input[type="password"], textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: var(--radius);
+        border: 1px solid #ccc;
+        font-size: 14px;
+        transition: var(--transition);
+        }
+    </style>
 </head>
 <body>
     <!-- Contact formulier met mailto naar docent -->

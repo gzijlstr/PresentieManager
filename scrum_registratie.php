@@ -106,15 +106,20 @@ $scrums = $conn->query("SELECT id, username FROM users WHERE role = 'scrum' ORDE
         }
         form {
             margin-bottom: 20px;
+            width: 350px;
+            text-align: center;
         }
         .form-scrum {
             background-color: transparent;
             box-shadow: none;
         }
+       .box1 { display: flex; justify-content: center; flex-direction: column; align-items: center;}
+
     </style>
 </head>
 <body class="main-pagina">
-    <h2>Beheer Scrum Gebruikers</h2>
+  <class class="box1">
+        <h2>Beheer Scrum Gebruikers</h2>
     <?php if ($message): ?>
         <div style="background:#eef; padding:10px; margin-bottom:10px;">
             <?= $message ?>
@@ -122,11 +127,11 @@ $scrums = $conn->query("SELECT id, username FROM users WHERE role = 'scrum' ORDE
     <?php endif; ?>
 
     <!-- tabbel voor het aanmaken van nieuwe scrum users -->
-    <h3>Nieuwe Scrum Gebruiker Aanmaken</h3>
     <form method="POST" action="">
+        <h3>Nieuwe Scrum Gebruiker Aanmaken</h3>
         <input type="hidden" name="form_type" value="add_user">
-        Gebruikersnaam: <input type="text" name="username" required><br>
-        Wachtwoord: <input type="password" name="password" required><br>
+        Gebruikersnaam: <br><input type="text" name="username" required><br>
+        Wachtwoord: <br><input type="password" name="password" required><br>
         <input type="submit" value="Aanmaken">
     </form>
 
@@ -144,11 +149,12 @@ $scrums = $conn->query("SELECT id, username FROM users WHERE role = 'scrum' ORDE
                     <form method="POST" action="" class="form-scrum" style="display:inline;">
                         <input type="hidden" name="form_type" value="delete_user">
                         <input type="hidden" name="user_id" value="<?= $scrum['id'] ?>">
-                        <button style="padding: 5px;" type="submit" class="delete-btn" onclick="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')">Verwijder</button>
+                        <button style="padding: 5px; margin: 10px;" type="submit" class="delete-btn" onclick="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')">Verwijderen</button>
                     </form>
                 </td>
             </tr>
         <?php endwhile; ?>
     </table>
+  </class> 
 </body>
 </html>

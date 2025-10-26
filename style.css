@@ -205,7 +205,7 @@ button:hover,
   text-align: center;
   padding: 1rem 0;
   font-size: 14px;
-  min-height: 50px;
+  min-height: 5vh;
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -390,20 +390,5 @@ button:hover,
     max-width: 100%;
     height: auto;
   }
-}
-
-/* --------------------------------------------
-   Footer blijft statisch
----------------------------------------------*/
-#footer {
-  position: static;
-  background-color: var(--color-greenblue);
-  color: var(--color-white);
-  text-align: center;
-  padding: 1rem 0;
-  font-size: 14px;
-  border-bottom: 7px solid var(--color-greenblue);
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
