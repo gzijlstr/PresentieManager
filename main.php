@@ -1,4 +1,12 @@
 <?php
+// debugging voor php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+?>
+<?php
+
+// Sessie word gestart en checkt of de gebruiker is ingelogd,
+// word anders weer naar de login teruggekeert.
 session_start();
 if (!isset($_SESSION['username'])) {
     header("Location: loginpage.php"); // send back to login if not logged in

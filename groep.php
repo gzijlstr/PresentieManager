@@ -1,9 +1,11 @@
 <?php
+// debugging voor php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
-// checkt of de gebruiker is ingelogd, 
+// Sessie word gestart en checkt of de gebruiker is ingelogd,
+// word anders weer naar de login teruggekeert.
+session_start(); 
 if (!isset($_SESSION['username'])) {
     header("Location: loginpage.php"); 
     exit();
@@ -16,14 +18,14 @@ include 'nav.php';
 
 $message = '';
 
-// prepared statement voor het verkrijgen van de role van de gebruiker (username), bindt string aan user
+// prepared statement voor het verkrijgen van de role van de gebruiker (username), bindt string aan user.
 $stmt = $conn->prepare("SELECT id, role FROM users WHERE username = ?");
 $stmt->bind_param("s", $_SESSION['username']);
 $stmt->execute();
 
 
 // resultaat van de query, role en user_id worden gedefinieerd,
-// daarna wordt de statement gesloten
+// daarna wordt de statement gesloten.
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $user_id = $user['id'];
@@ -50,7 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['form_type'])) {
         if ($groep) {
             $groep_id = $groep['id'];
 
-            // ✅ Tel aantal studenten
+            // functie voor het tellen van aantal studenten met sql "count". 
+            // debugging zodat er geen oneindig studenten kunnen worden aangemaakt, en niet zonder groep.
             $countQuery = $conn->prepare("SELECT COUNT(*) AS count FROM studenten WHERE groep_id = ?");
             $countQuery->bind_param("i", $groep_id);
             $countQuery->execute();
@@ -59,27 +62,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['form_type'])) {
             $countQuery->close();
 
             if ($count >= 10) {
-                $message = "⚠️ Je hebt al het maximum van 10 studenten in deze groep.";
+                $message = "Je hebt al het maximum van 10 studenten in deze groep.";
             } else {
                 $stmt = $conn->prepare("INSERT INTO studenten (naam, groep_id) VALUES (?, ?)");
                 $stmt->bind_param("si", $naam, $groep_id);
                 if ($stmt->execute()) {
-                    $message = "✅ Student '$naam' toegevoegd aan je groep.";
+                    $message = "Student '$naam' toegevoegd aan je groep.";
                 } else {
-                    $message = "❌ Fout bij toevoegen student: " . $stmt->error;
+                    $message = "Fout bij toevoegen student: " . $stmt->error;
                 }
                 $stmt->close();
             }
         } else {
-            $message = "❌ Je hebt nog geen groep aangemaakt.";
+            $message = "Je hebt nog geen groep aangemaakt.";
         }
     }
 
-    // 🗑️ STUDENT VERWIJDEREN
+    // functie student verwijderen. 
     if ($_POST['form_type'] === "delete_student") {
         $student_id = intval($_POST['student_id'] ?? 0);
 
-        // Controleer of de student echt bij de gebruiker hoort (veiligheid!)
+        // Controleer of de student echt bij de gebruiker en groep hoort.
         $stmt = $conn->prepare("SELECT s.id 
             FROM studenten s 
             JOIN groepen g ON s.groep_id = g.id 
@@ -92,13 +95,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['form_type'])) {
             $delete = $conn->prepare("DELETE FROM studenten WHERE id = ?");
             $delete->bind_param("i", $student_id);
             if ($delete->execute()) {
-                $message = "🗑️ Student succesvol verwijderd.";
+                $message = "Student succesvol verwijderd.";
             } else {
-                $message = "❌ Fout bij verwijderen student: " . $delete->error;
+                $message = "Fout bij verwijderen student: " . $delete->error;
             }
             $delete->close();
         } else {
-            $message = "🚫 Je mag deze student niet verwijderen.";
+            $message = "Je mag deze student niet verwijderen.";
         }
         $stmt->close();
     }
@@ -107,12 +110,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['form_type'])) {
     if ($_POST['form_type'] === "groep") {
         $groepnaam = $_POST['groepnaam'];
 
-        // query for obtaining the id of the current user
+        // query voor het krijgen van de id van de gebruiker
         $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->bind_param("s", $_SESSION['username']);
         $stmt->execute();
 
-        // getting the results
+        // resultaat van de query
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
         $user_id = $user['id'];
@@ -164,6 +167,8 @@ if ($role === 'admin') {
     <meta name="description" content="Applicatie voor het regelen van groepspresentie">
     <title>Beheer je groep als scrum master.</title>
 
+
+    <!-- CSS styling -->
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 
     <style>
@@ -193,18 +198,32 @@ if ($role === 'admin') {
         <div class="groep-container">
             <?php if ($groepenResult->num_rows > 0): ?>
                 <?php while ($groep = $groepenResult->fetch_assoc()): ?>
-                    <div class="box1">
+                    
+                    <div class="box1" style="background-color: #f0f0f0; padding: 20px; border-radius: 15px; border: solid 2px white; ">
+                        <!-- overzicht van groepnaam en studenten. -->
                         <table style="margin-bottom: 15px;">
                         <tr>
                             <th>Groep naam:</th>
                             <th><p style=" font-weight: bolder; "><?= htmlspecialchars($groep['groepnaam']) ?></p></th>
+                            <th><tr>
+                                <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
+                                    <form method="POST" action="?groep_id=...">
+
+                                        <input type="hidden" name="form_type" value="student">
+                                        <h3>Student toevoegen</h3><br>
+                                        Naam student: <input type="text" name="naam" required>
+                                        <input type="submit" value="Toevoegen">
+                                    </form>
+                                <?php endif; ?>
+                            </tr></th>
                         </tr>
-                        </table>
+
                         <table style="margin-bottom: 50px;">
                             <tr>
                                 <th>Studenten:</th>
                                 <th>Actie</th>
                             </tr>
+                            <!-- student kan alleen studenten aan haar eigen groep toevoegen -->
                             <?php
                             $groep_id = $groep['id'];
                             $studenten = $conn->query("SELECT id, naam FROM studenten WHERE groep_id = $groep_id");
@@ -224,31 +243,21 @@ if ($role === 'admin') {
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr><td><em>Geen studenten toegevoegd</em></td></tr>
-                            <?php endif; ?> <!-- closes if($studenten->num_rows > 0) -->
+                            <?php endif; ?> 
                         </table>
-                    </div>
-                    <div class="box2">
-                            <!-- only allow adding students to your own group -->
-                        <?php if ($role === 'admin' || $groep['id'] == ($conn->query("SELECT id FROM groepen WHERE user_id = $user_id")->fetch_assoc()['id'] ?? 0)): ?>
-                                <form method="POST" action="?groep_id=...">
-
-                                    <input type="hidden" name="form_type" value="student">
-                                    <h3>Student toevoegen</h3><br>
-                                    Naam student: <input type="text" name="naam" required>
-                                    <input type="submit" value="Toevoegen">
-                                </form>
-                        <?php endif; ?>
                     </div>
 
                 <?php endwhile; ?>
             <?php else: ?>
-                <!-- only show if user has no group -->
-                <h3>Maak een groep</h3>
-                <form method="POST" action="?groep_id=...">
-                    <input type="hidden" name="form_type" value="groep">
-                    Naam van de groep: <input type="text" name="groepnaam" required><br>
-                    <input type="submit" value="Groep toevoegen">
-                </form>
+                <!-- word alleen zichtbaar als de gebruiker geen groep bezit -->
+                 <div class="groep-aanmaken">
+                    <h3>Maak een groep</h3>
+                    <form method="POST" action="?groep_id=...">
+                        <input type="hidden" name="form_type" value="groep">
+                        Naam van de groep: <input type="text" name="groepnaam" required><br>
+                        <input type="submit" value="Groep toevoegen">
+                    </form>
+                 </div>
             <?php endif; ?>
         </div>
     </section>

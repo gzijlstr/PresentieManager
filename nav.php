@@ -1,6 +1,9 @@
 <?php
+// functie voor het verkrijgen van de pagina die geladen is.
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
+
+<!-- navigatie menu met responsive "burger" menu -->
 <nav id="navmenu">
   <div class="nav-container">
     <button id="menu-toggle" aria-label="Menu">☰</button>
@@ -11,12 +14,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
       <li><a href="overzicht.php" class="<?= $current_page == 'overzicht.php' ? 'active' : '' ?>">Overzicht</a></li>
       <li><a href="contact.php" class="<?= $current_page == 'contact.php' ? 'active' : '' ?>">Contact</a></li>
 
-
+      <!-- admin tab "scrum_registratie" word toegevoegd als de gebruiker is ingelogd en admin is -->
       <?php if (isset($_SESSION['username']) && $_SESSION['username'] === 'teacher1'): ?>
       <a href="scrum_registratie.php">Beheer gebruikers</a>
       <?php endif; ?>
 
-
+      <!-- logout tab -->
       <?php if (isset($_SESSION['username'])): ?>
         <li><a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['username']); ?>)</a></li>
       <?php endif; ?>
@@ -24,6 +27,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
   </div>
 </nav>
 
+<!-- javascript functie voor geselecteerde pagina -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('menu-toggle');

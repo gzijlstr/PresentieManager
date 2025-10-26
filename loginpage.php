@@ -1,19 +1,25 @@
-
 <?php
+// debugging voor php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+?>
+<?php
+
 session_start();
 include 'db.php';
 include 'nav.php';
 
 $message = "";
 
-// ✅ Toon logout message indien aanwezig
+// Toon logout bericht wanneer de gebruiker zich uitgelogd heeft.
 if (isset($_SESSION['logout_message'])) {
     $message = $_SESSION['logout_message'];
     unset($_SESSION['logout_message']); // verwijder na tonen
 }
 
 
-// only runs when the form is submitted
+// Word alleen gebruikt wanneer er sprake is van ""POST"",
+// gegevens word aan de gebruiker gekoppeld.
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -26,19 +32,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
+
+        // gebruiker word naar de main pagina gebracht als de gegevens kloppen.
         if (password_verify($password, $user['password'])) {
-            // ✅ store session data correctly
+            // informatie van de sessie word opgeslagen
             $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role']; // from DB
-            $_SESSION['user_id'] = $user['id']; // optional, often useful
+            $_SESSION['role'] = $user['role']; 
+            $_SESSION['user_id'] = $user['id']; 
 
             header("Location: main.php");
             exit();
         } else {
-            $message = "❌ Ongeldige gebruikersnaam of wachtwoord.";
+            $message = "Ongeldige gebruikersnaam of wachtwoord.";
         }
     } else {
-        $message = "❌ Ongeldige gebruikersnaam of wachtwoord.";
+        $message = "Ongeldige gebruikersnaam of wachtwoord.";
     }
 
     $stmt->close();
@@ -57,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="description" content="Applicatie voor het regelen van groepspresentie">
     <title>Login pagina voor het Museum project</title>
 
+<!-- CSS styling  -->
 <link rel="stylesheet" href="style.css">
 <style>.error{color:red;display:none;}</style>
 </head>
@@ -70,6 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
 <section id="homepagina" style="display: flex;">
     <br><br>
+    <!-- login form -->
     <div class="login-veld">
         <form id="loginform" method="POST">
             <h2>Login</h2>
