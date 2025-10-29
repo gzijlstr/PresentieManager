@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- login form -->
     <div class="login-veld">
         <form id="loginform" method="POST">
-            <h2>Login</h2>
+            <h1>Login</h1>
             Gebruikersnaam: <input id="usernamelog" type="text" name="username" required><br>
             Wachtwoord: <input id="passwordlog" type="password" name="password" required><br>
             <br>
