@@ -1,9 +1,10 @@
 <?php
+// php debug
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// indien er geen username is, moet de gebruiker nog eerst inloggen
 session_start();
-echo "<pre>SESSION DEBUG:\n"; print_r($_SESSION); echo "</pre>";
 if (!isset($_SESSION['username'])) {
     header("Location: loginpage.php");
     exit();
@@ -12,15 +13,10 @@ if (!isset($_SESSION['username'])) {
 include 'nav.php';
 include 'db.php';
 
-// --- Debug POST ---
-echo "<pre style='background:#eee;padding:10px;border:1px solid #ccc;'>";
-echo "DEBUG POST:\n";
-print_r($_POST['studenten'] ?? 'No POST data yet.');
-echo "</pre>";
-
+// bericht voor debugging en gerbuiker informatie 
 $message = "";
 
-// --- Get logged-in user info ---
+// informatie behalen over de ingelogde gebruiker
 $stmt = $conn->prepare("SELECT id, role FROM users WHERE username = ?");
 $stmt->bind_param("s", $_SESSION['username']);
 $stmt->execute();
@@ -30,10 +26,10 @@ $user_id = $user['id'];
 $role = $user['role'];
 $stmt->close();
 
-// --- Selected date ---
+// verkrijgt geselecteerde datum
 $selected_date = $_GET['datum'] ?? date("Y-m-d");
 
-// --- Handle POST: save/update all students ---
+// update de informatie over studenten behandelt de POST als die gemaakt is met de form
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studenten']) && is_array($_POST['studenten'])) {
 
     foreach ($_POST['studenten'] as $student_id => $data) {
@@ -44,15 +40,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studenten']) && is_ar
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE aanwezig = VALUES(aanwezig), description = VALUES(description)";
 
+        // debug als de POST niet correct is
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             $message .= "Fout bij student $student_id: " . $conn->error . "<br>";
             continue;
         }
-
-        // Debug each insert
-        echo "➡️ Inserting student $student_id | aanwezig=$aanwezig | date=$selected_date | desc='$description'<br>";
-
+        // debug bij stmt
         $stmt->bind_param("isis", $student_id, $selected_date, $aanwezig, $description);
         if (!$stmt->execute()) {
             $message .= "Fout bij student $student_id: " . $stmt->error . "<br>";
@@ -63,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['studenten']) && is_ar
     if (!$message) $message = "✅ Aanwezigheid succesvol opgeslagen!";
 }
 
-// --- Fetch students for this user/group ---
+// docent: behalen van een tabel van de studenten van de specifieke groep
 if ($role === 'admin') {
     $sql = "SELECT s.id, s.naam, a.aanwezig, a.description
             FROM studenten s
@@ -72,6 +66,7 @@ if ($role === 'admin') {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $selected_date);
 } else {
+// scrum master behalen van de studenten van zijn groep
     $sql = "SELECT s.id, s.naam, a.aanwezig, a.description
             FROM studenten s
             JOIN groepen g ON s.groep_id = g.id
@@ -82,6 +77,7 @@ if ($role === 'admin') {
     $stmt->bind_param("si", $selected_date, $user_id);
 }
 
+// statement word gedaan en geupdate
 $stmt->execute();
 $result = $stmt->get_result();
 $students = $result->fetch_all(MYSQLI_ASSOC);
@@ -91,9 +87,15 @@ $stmt->close();
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Presentie bewerken</title>
+<!-- SEO Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Registreer of bewerk hier de presentie</title>
+
+<!-- Style CSS -->
 <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
 <style>
 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
@@ -106,20 +108,18 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
 </head>
 <body>
 
-<h2>Presentie bewerken</h2>
 
-<!-- Display message -->
+<!-- debug of gebruiker data informatie -->
 <?php if ($message): ?>
 <div style="background: #cfc; padding:10px; margin-bottom:10px;">
     <?= $message ?>
 </div>
 <?php endif; ?>
 
-<!-- Show current request type -->
-<p><strong>DEBUG:</strong> Current method: <?= htmlspecialchars($_SERVER['REQUEST_METHOD']) ?></p>
-
-<!-- ✅ Calendar / Date selector -->
+<!-- Kalender functie-->
+ <br>
 <form id="dateForm" method="GET" action="">
+    <h2>Presentie bewerken</h2>
     <label>Datum:
         <input type="date" name="datum" value="<?= htmlspecialchars($selected_date) ?>">
     </label>
@@ -127,9 +127,8 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
 </form>
 
 
-<!-- ✅ Students POST form -->
+<!-- studenten form met de geselecteerde datum-->
 <form id="saveForm" method="POST" action="?datum=<?= htmlspecialchars($selected_date) ?>">
-
     <table>
         <tr>
             <th>Naam</th>
@@ -140,6 +139,7 @@ button, input[type=submit] { padding: 8px 15px; border-radius: 5px; border: 1px 
         <tr>
             <td><?= htmlspecialchars($s['naam']) ?></td>
             <td>
+                <!-- POST geeft een array mee met de aanwezig heid als boolean -->
                 <label>
                     <input type="radio" name="studenten[<?= $s['id'] ?>][aanwezig]" value="1" <?= $s['aanwezig'] ? 'checked' : '' ?>> Ja
                 </label>

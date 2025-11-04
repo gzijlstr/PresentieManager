@@ -1,6 +1,8 @@
 <?php
+
+// Sessie word gestart en checkt of de gebruiker is ingelogd,
+// word anders weer naar de login teruggekeert.
 session_start();
-// checkt of de gebruiker is ingelogd, 
 if (!isset($_SESSION['username'])) {
     header("Location: loginpage.php"); 
     exit();
@@ -11,6 +13,7 @@ if (!isset($_SESSION['username'])) {
 include 'db.php';
 include 'nav.php';
 
+// standaard message voor debugging en gebruiker informatie
 $message = '';
 
 // prepared statement voor het verkrijgen van de role van de gebruiker (username), bindt string aan user
@@ -34,14 +37,29 @@ $stmt->close();
     <!-- SEO Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neem contact met ons op</title>
+    <meta name="keywords" content="Presentie, Aanwezigheid, Overzicht">
+    <meta name="Author" content="Gerben Zijlstra">
+    <meta name="description" content="Applicatie voor het regelen van groepspresentie">
+    <title>Neem contact met ons op.</title>
 
+    <!-- Style css -->
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
+    <style>
+        input[type="text"], input[type="email"], input[type="password"], textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: var(--radius);
+        border: 1px solid #ccc;
+        font-size: 14px;
+        transition: var(--transition);
+        }
+    </style>
 </head>
 <body>
-    <!-- Contact  -->
+    <!-- Contact formulier met mailto naar docent -->
     <section id="contact" class="contact">
-            <form action="mailto:marco.hoekstra@firda.nl" method="post" enctype="text/plain">  
+            <form action="mailto:marco.hoekstra@firda.nl" method="post" enctype="text/plain" style="margin-top: 50px;">   
                 <h2>Contact formulier</h2>
                 Voor- en achternaam: <input type="text" name="" required><br>
                 Studentnummer: <input type="text" name="" required><br>

@@ -1,4 +1,12 @@
 <?php
+// debugging voor php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+?>
+<?php
+
+// Sessie word gestart en checkt of de gebruiker is ingelogd,
+// word anders weer naar de login teruggekeert.
 session_start();
 if (!isset($_SESSION['username'])) {
     header("Location: loginpage.php"); // send back to login if not logged in
@@ -26,26 +34,57 @@ include 'nav.php';
 
 
     <link rel="stylesheet" href="style.css?v=<?php echo time();?>">
+    <style>
+        html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        }
+
+        body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        }
+
+        .page-wrapper {
+        flex: 1;
+        }
+    </style>
     <!-- pagina word elke 2 seconden herladen voor testing -->
     <!-- <meta http-equiv="refresh" content="2">  auto-refresh every 2 seconds for dev -->
     </head>
 <body class="main-pagina">
-    <header id="header">       
-    </header>
+  <div class="page-wrapper">
+    <header id="header"></header>
+
     <!-- Home section-->
     <section id="homepagina" class="homepagina">            
-        
-        <!-- sticky navigatie buttons 
-        <button id="sticky-button"><a href="#contact">Contact</a></button>
-        <button id="sticky-button" style="margin-bottom: 40px;"><a href="#homepagina">Home</a></button> 
-        -->
-        <div class="container">
-            <h1>Presentie Manager voor het Museum project</h1>
-            <img src="img/logo1.png" alt="Museum project">
-        </div> 
+      <div class="container">
+        <div class="intro">
+          <img src="img/logo1.png" alt="Museum project">
+          <div class="intro-text">
+            <h1>Presentie Manager</h1>
+            <p>
+              Presentie Manager is een webapplicatie waarmee scrum masters en docenten <br> 
+              aanwezigheidsgegevens van studenten kunnen beheren. <br>
+              De tool biedt overzicht, efficiëntie en gebruiksgemak bij het bijhouden van presentie.
+            </p>
+          </div>
+          <br><br>
+          <div class="intro-text" style="height: 70px;">
+            <p>
+              Merk je een bug of iets dat niet helemaal werkt zoals het hoort?
+              Laat het ons weten via het <a href="contact.php">contactformulier</a>!
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
-    <section id="footer">
-        <p>© 2025 Gerben Zijlstra.</p>
-    </section>
+  </div>
+
+  <footer id="footer">
+    <p>© 2025 Gerben Zijlstra.</p>
+  </footer>
 </body>
 </html>

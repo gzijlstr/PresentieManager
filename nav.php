@@ -1,15 +1,42 @@
+<?php
+// functie voor het verkrijgen van de pagina die geladen is.
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
+
+<!-- navigatie menu met responsive "burger" menu -->
 <nav id="navmenu">
-    <ul>
-        <li><a href="main.php">Home</a></li>
-        <li><a href="groep.php">Jouw Groep</a></li>
-        <li><a href="presentie.php">Presentie bewerken</a></li>
-        <li><a href="overzicht.php">Overzicht</a></li>
-        <li><a href="contact.php">Contact</a></li>
-        <?php
-        // als de sessie een username bevat en niet NULL is.   
-        if (isset($_SESSION['username'])): 
-        ?>
-            <li><a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['username']); ?>)</a></li>
-        <?php endif; ?>
+  <div class="nav-container">
+    <button id="menu-toggle" aria-label="Menu">☰</button>
+    <ul id="nav-links">
+      <li><a href="main.php" class="<?= $current_page == 'main.php' ? 'active' : '' ?>">Home</a></li>
+      <li><a href="groep.php" class="<?= $current_page == 'groep.php' ? 'active' : '' ?>">Jouw groep</a></li>
+      <li><a href="presentie.php" class="<?= $current_page == 'presentie.php' ? 'active' : '' ?>">Presentie</a></li>
+      <li><a href="overzicht.php" class="<?= $current_page == 'overzicht.php' ? 'active' : '' ?>">Overzicht</a></li>
+      <li><a href="contact.php" class="<?= $current_page == 'contact.php' ? 'active' : '' ?>">Contact</a></li>
+
+      <!-- admin tab "scrum_registratie" word toegevoegd als de gebruiker is ingelogd en admin is -->
+      <?php if (isset($_SESSION['username']) && $_SESSION['username'] === 'teacher1'): ?>
+      <a href="scrum_registratie.php">Beheer gebruikers</a>
+      <?php endif; ?>
+
+      <!-- logout tab -->
+      <?php if (isset($_SESSION['username'])): ?>
+        <li><a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['username']); ?>)</a></li>
+      <?php endif; ?>
     </ul>
+  </div>
 </nav>
+
+<!-- javascript functie voor geselecteerde pagina -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+    toggle.addEventListener('click', () => {
+      navLinks.classList.toggle('show');
+    });
+  });
+</script>
+
+
+
